@@ -163,10 +163,19 @@ function humanizeTimestamp(isoValue) {
 }
 
 async function jsonFetch(url) {
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`Request failed: ${url}`);
+  let res;
+  try {
+    res = await fetch(url);
+  } catch (networkErr) {
+    console.error(`jsonFetch network error for ${url}:`, networkErr);
+    throw new Error("Unable to reach the server. Please check your connection and try again.");
   }
+
+  if (!res.ok) {
+    console.error(`jsonFetch failed for ${url}: ${res.status} ${res.statusText}`);
+    throw new Error("Unable to retrieve data right now. Please try again shortly.");
+  }
+
   return res.json();
 }
 
@@ -531,7 +540,8 @@ async function loadAndRenderLeaderboard() {
       </table>
     `;
   } catch (err) {
-    chartBox.innerHTML = `<div class='profile-empty'>Failed to load leaderboard: ${err.message}. Please restart the server (<code>npm start</code>) to activate new API routes.</div>`;
+    console.error("Failed to load leaderboard:", err);
+    chartBox.innerHTML = "<div class='profile-empty'>Unable to load the leaderboard right now. Please try again later.</div>";
     tableBox.innerHTML = "";
   }
 }
@@ -638,7 +648,8 @@ async function loadAndRenderVotingAnalytics() {
       </table>
     `;
   } catch (err) {
-    summaryBox.innerHTML = `<div class='profile-empty'>Failed to load voting analytics: ${err.message}</div>`;
+    console.error("Failed to load voting analytics:", err);
+    summaryBox.innerHTML = "<div class='profile-empty'>Unable to load voting analytics right now. Please try again later.</div>";
   }
 }
 
@@ -710,7 +721,8 @@ async function loadAndRenderTimeline() {
       })
       .join("");
   } catch (err) {
-    container.innerHTML = `<div class='profile-empty'>Failed to load timeline: ${err.message}</div>`;
+    console.error("Failed to load timeline:", err);
+    container.innerHTML = "<div class='profile-empty'>Unable to load the timeline right now. Please try again later.</div>";
   }
 }
 
@@ -879,7 +891,8 @@ async function loadAndRenderSocialGraph() {
       node.attr("transform", (d) => `translate(${d.x},${d.y})`);
     });
   } catch (err) {
-    root.innerHTML = `<div class='profile-empty'>Failed to load social graph: ${err.message}. If you recently updated, please restart the server (<code>npm start</code>) and refresh.</div>`;
+    console.error("Failed to load social graph:", err);
+    root.innerHTML = "<div class='profile-empty'>Unable to load the social graph right now. Please try again later.</div>";
   }
 }
 
@@ -1127,6 +1140,7 @@ window.addEventListener("resize", () => {
     await loadCountryScopedSeasons();
     await refresh();
   } catch (error) {
-    profilePanel.innerHTML = `<div class="profile-empty">Failed to load data: ${error.message}</div>`;
+    console.error("Failed to initialize app:", error);
+    profilePanel.innerHTML = "<div class=\"profile-empty\">Unable to load data right now. Please refresh the page or try again later.</div>";
   }
 })();

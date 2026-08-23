@@ -127,6 +127,7 @@ h1 {
   animation: fadeIn 0.2s ease-in-out;
   flex: 1;
   min-height: 0;
+  min-width: 0;
 }
 
 .tab-content.active {
@@ -165,20 +166,29 @@ h1 {
 /* Leaderboard */
 .leaderboard-container {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
+  min-width: 0;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .chart-box {
   min-height: 220px;
+  min-width: 0;
   background: #fbfdfe;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   padding: 0.75rem;
+  overflow-x: auto;
 }
 
 .table-box {
   max-height: 400px;
+  min-width: 0;
   overflow-y: auto;
+  overflow-x: auto;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   background: #ffffff;
