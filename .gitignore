@@ -1,0 +1,6 @@
+node_modules/
+.env
+.DS_Store
+
+# Internal planning doc — not part of the shipped implementation
+reality_competition_analytics_platform.md

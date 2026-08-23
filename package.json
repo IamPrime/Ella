@@ -1,0 +1,14 @@
+{
+  "name": "reality-competition-analytics-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Vertical-slice MVP for a provenance-aware reality competition analytics platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reality Competition Analytics Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="shell-header">
+      <p class="kicker">Reality Competition Analytics Platform</p>
+      <h1>The Traitors TV Show</h1>
+      <p class="subtitle">Country-wide and season-level contestant geography with canonical data and provenance.</p>
+    </header>
+
+    <main class="layout">
+      <section class="controls card">
+        <h2>Filters</h2>
+        <label>
+          Country
+          <select id="countryFilter"></select>
+        </label>
+        <label>
+          Season
+          <select id="seasonFilter"></select>
+        </label>
+        <label>
+          Role
+          <select id="roleFilter">
+            <option value="">All roles</option>
+            <option value="faithful">Faithful</option>
+            <option value="traitor">Traitor</option>
+          </select>
+        </label>
+        <label>
+          Outcome
+          <select id="outcomeFilter">
+            <option value="">All outcomes</option>
+            <option value="winner">Winner</option>
+            <option value="finale">Finale</option>
+            <option value="banishment">Banishment</option>
+            <option value="murder">Murder</option>
+            <option value="quit">Quit</option>
+            <option value="removed">Removed</option>
+          </select>
+        </label>
+        <div class="stats" id="seasonStats"></div>
+        <div class="show-context" id="showContext"></div>
+      </section>
+
+      <section class="main-display card">
+        <nav class="tab-nav" aria-label="Analytics Views">
+          <button class="tab-btn active" data-tab="tab-map" type="button">🗺️ Contestant Map</button>
+          <button class="tab-btn" data-tab="tab-leaderboard" type="button">📊 City Leaderboard</button>
+          <button class="tab-btn" data-tab="tab-voting" type="button">🎯 Voting Analytics</button>
+          <button class="tab-btn" data-tab="tab-timeline" type="button">⏳ Player Timeline</button>
+          <button class="tab-btn" data-tab="tab-graph" type="button">🕸️ Social Graph</button>
+        </nav>
+
+        <!-- Tab 1: Map -->
+        <div id="tab-map" class="tab-content active">
+          <div class="view-header">
+            <div>
+              <h2>Contestant Geography</h2>
+              <p class="hint">Hover a point for quick details. Click to open a contestant profile with source claims.</p>
+            </div>
+            <div class="map-tools">
+              <button id="zoomInBtn" type="button" title="Zoom In">+</button>
+              <button id="zoomOutBtn" type="button" title="Zoom Out">-</button>
+              <button id="zoomResetBtn" type="button" title="Reset View">Reset</button>
+            </div>
+          </div>
+          <div id="mapRoot" class="map-root"></div>
+        </div>
+
+        <!-- Tab 2: City Leaderboard -->
+        <div id="tab-leaderboard" class="tab-content">
+          <div class="view-header">
+            <div>
+              <h2>Origin City Leaderboard</h2>
+              <p class="hint">Distribution and ranking of contestant hometowns & residences derived from canonical records.</p>
+            </div>
+          </div>
+          <div class="leaderboard-container">
+            <div id="leaderboardChart" class="chart-box"></div>
+            <div id="leaderboardTable" class="table-box"></div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Voting Analytics -->
+        <div id="tab-voting" class="tab-content">
+          <div class="view-header">
+            <div>
+              <h2>Voting Analytics & Sabermetrics</h2>
+              <p class="hint">Traitor detection accuracy, false accusation rate, and majority alignment metrics derived from roundtables.</p>
+            </div>
+          </div>
+          <div class="sabermetrics-summary" id="votingSummaryMetrics"></div>
+          <div class="voting-section-title">Contestant Voting Accuracy & Majority Alignment</div>
+          <div id="votingTableContainer" class="table-box"></div>
+          <div class="voting-section-title">Roundtable Vote Log</div>
+          <div id="rawVoteLogContainer" class="table-box mini-log"></div>
+        </div>
+
+        <!-- Tab 4: Player Timeline -->
+        <div id="tab-timeline" class="tab-content">
+          <div class="view-header">
+            <div>
+              <h2>Player Journey Timeline</h2>
+              <p class="hint">Episode-by-episode chronological gameplay events, shields, accusations, recruitments, and exit paths.</p>
+            </div>
+            <div class="timeline-controls">
+              <label>Select Player:
+                <select id="timelinePlayerSelect"></select>
+              </label>
+            </div>
+          </div>
+          <div id="playerTimelineRoot" class="timeline-container"></div>
+        </div>
+
+        <!-- Tab 5: Social / Voting Graph -->
+        <div id="tab-graph" class="tab-content">
+          <div class="view-header">
+            <div>
+              <h2>Social &amp; Voting Network Graph</h2>
+              <p class="hint">Force-directed network of voter &rarr; target relationships. Drag nodes to explore alliances &amp; rivalries. Scroll/pinch or use the controls to zoom, and drag the background to pan.</p>
+            </div>
+            <div class="map-tools">
+              <button id="graphZoomInBtn" type="button" title="Zoom In">+</button>
+              <button id="graphZoomOutBtn" type="button" title="Zoom Out">-</button>
+              <button id="graphZoomResetBtn" type="button" title="Reset View">Reset</button>
+            </div>
+          </div>
+          <div id="graphRoot" class="graph-root"></div>
+        </div>
+
+        <div id="tooltip" class="tooltip" hidden></div>
+      </section>
+
+      <section class="detail card">
+        <h2>Contestant Profile</h2>
+        <div id="profilePanel" class="profile-empty">Select a contestant point to view details and sources.</div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+name: Promote tag to release
+
+# Deployments (Netlify / Render / custom domain) should track the `release`
+# branch, never `main`. Pushing a version tag (v1.0.0, v1.1.0, ...) is the
+# only thing that moves `release` forward, so a deploy only ever happens
+# when you deliberately cut a version.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  fast-forward-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Point release branch at this tag
+        run: |
+          git push origin "${GITHUB_REF_NAME}:refs/heads/release" --force
