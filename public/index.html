@@ -11,40 +11,50 @@
   </head>
   <body>
     <header class="shell-header">
-      <p class="kicker">Reality Competition Analytics Platform</p>
-      <h1>The Traitors TV Show</h1>
-      <p class="subtitle">Country-wide and season-level contestant geography with canonical data and provenance.</p>
+      <p class="kicker" id="kickerText">Reality Competition Analytics Platform</p>
+      <div class="header-row">
+        <h1 id="appTitleText">The Traitors TV Show</h1>
+        <div class="language-header-control">
+          <div class="language-kit" id="languageKitBadge">Language: Detecting...</div>
+          <label class="language-switch" for="languageModeToggle">
+            <span id="languageModeEnglishText">English</span>
+            <input id="languageModeToggle" type="checkbox" checked />
+            <span id="languageModeCountryText">Country</span>
+          </label>
+        </div>
+      </div>
+      <p class="subtitle" id="subtitleText">Country-wide and season-level contestant geography with canonical data and provenance.</p>
     </header>
 
     <main class="layout">
       <section class="controls card">
-        <h2>Filters</h2>
+        <h2 id="filtersTitleText">Filters</h2>
         <label>
-          Country
+          <span id="countryLabelText">Country</span>
           <select id="countryFilter"></select>
         </label>
         <label>
-          Season
+          <span id="seasonLabelText">Season</span>
           <select id="seasonFilter"></select>
         </label>
         <label>
-          Role
+          <span id="roleLabelText">Role</span>
           <select id="roleFilter">
-            <option value="">All roles</option>
-            <option value="faithful">Faithful</option>
-            <option value="traitor">Traitor</option>
+            <option id="roleOptionAllText" value="">All roles</option>
+            <option id="roleOptionFaithfulText" value="faithful">Faithful</option>
+            <option id="roleOptionTraitorText" value="traitor">Traitor</option>
           </select>
         </label>
         <label>
-          Outcome
+          <span id="outcomeLabelText">Outcome</span>
           <select id="outcomeFilter">
-            <option value="">All outcomes</option>
-            <option value="winner">Winner</option>
-            <option value="finale">Finale</option>
-            <option value="banishment">Banishment</option>
-            <option value="murder">Murder</option>
-            <option value="quit">Quit</option>
-            <option value="removed">Removed</option>
+            <option id="outcomeOptionAllText" value="">All outcomes</option>
+            <option id="outcomeOptionWinnerText" value="winner">Winner</option>
+            <option id="outcomeOptionFinaleText" value="finale">Finale</option>
+            <option id="outcomeOptionBanishmentText" value="banishment">Banishment</option>
+            <option id="outcomeOptionMurderText" value="murder">Murder</option>
+            <option id="outcomeOptionQuitText" value="quit">Quit</option>
+            <option id="outcomeOptionRemovedText" value="removed">Removed</option>
           </select>
         </label>
         <div class="stats" id="seasonStats"></div>
@@ -53,18 +63,29 @@
 
       <section class="main-display card">
         <nav class="tab-nav" aria-label="Analytics Views">
-          <button class="tab-btn active" data-tab="tab-map" type="button">🗺️ Contestant Map</button>
-          <button class="tab-btn" data-tab="tab-leaderboard" type="button">📊 City Leaderboard</button>
-          <button class="tab-btn" data-tab="tab-voting" type="button">🎯 Voting Analytics</button>
-          <button class="tab-btn" data-tab="tab-timeline" type="button">⏳ Player Timeline</button>
-          <button class="tab-btn" data-tab="tab-graph" type="button">🕸️ Social Graph</button>
+          <button id="tabMapBtnText" class="tab-btn active" data-tab="tab-map" type="button">🗺️ Contestant Map</button>
+          <button id="tabLeaderboardBtnText" class="tab-btn" data-tab="tab-leaderboard" type="button">📊 City Leaderboard</button>
+          <button id="tabVotingBtnText" class="tab-btn" data-tab="tab-voting" type="button">🎯 Voting Analytics</button>
+          <button id="tabOutcomeBtnText" class="tab-btn" data-tab="tab-outcomes" type="button">📉 Outcome Funnel</button>
+          <button id="tabGraphBtnText" class="tab-btn" data-tab="tab-graph" type="button">🕸️ Social Graph</button>
+          <div class="analytics-menu">
+            <button id="analyticsMenuBtn" class="tab-btn" type="button" aria-expanded="false" aria-controls="analyticsMenu">☰ More analytics</button>
+            <div id="analyticsMenu" class="analytics-menu-list" hidden>
+              <button id="tabSurvivalBtnText" data-tab="tab-survival" type="button">⌛ Role Survival</button>
+              <button id="tabWinRatesBtnText" data-tab="tab-win-rates" type="button">🏆 Win Rates</button>
+              <button id="tabEliminationsBtnText" data-tab="tab-eliminations" type="button">📅 Elimination Timeline</button>
+              <button id="tabPlacementsBtnText" data-tab="tab-placements" type="button">▥ Placement Distribution</button>
+              <button id="tabDiversityBtnText" data-tab="tab-diversity" type="button">◎ Geographic Diversity</button>
+              <button id="tabTimelineBtnText" data-tab="tab-timeline" type="button">⏳ Player Timeline</button>
+            </div>
+          </div>
         </nav>
 
         <!-- Tab 1: Map -->
         <div id="tab-map" class="tab-content active">
           <div class="view-header">
             <div>
-              <h2>Contestant Geography</h2>
+              <h2 id="contestantGeographyTitle">Contestant Geography</h2>
               <p class="hint">Hover a point for quick details. Click to open a contestant profile with source claims.</p>
             </div>
             <div class="map-tools">
@@ -105,6 +126,22 @@
           <div id="rawVoteLogContainer" class="table-box mini-log"></div>
         </div>
 
+        <div id="tab-outcomes" class="tab-content">
+          <div class="view-header">
+            <div>
+              <h2 id="outcomeFunnelTitle">Outcome Funnel</h2>
+              <p class="hint" id="outcomeFunnelHint">Compare the filtered cast's starting roles, eliminations, finalists, and winners.</p>
+            </div>
+          </div>
+          <div id="outcomeFunnelRoot" class="outcome-funnel"></div>
+        </div>
+
+        <div id="tab-survival" class="tab-content"><div class="view-header"><div><h2 id="survivalTitle">Role Survival Chart</h2><p class="hint" id="survivalHint">Median exit episode by starting role.</p></div></div><div id="survivalRoot" class="analytics-chart"></div></div>
+        <div id="tab-win-rates" class="tab-content"><div class="view-header"><div><h2 id="winRatesTitle">Win-Rate Breakdown</h2><p class="hint" id="winRatesHint">Winning percentage by starting role and franchise.</p></div></div><div id="winRatesRoot" class="analytics-chart"></div></div>
+        <div id="tab-eliminations" class="tab-content"><div class="view-header"><div><h2 id="eliminationsTitle">Elimination Timeline</h2><p class="hint" id="eliminationsHint">Exit outcomes by episode.</p></div></div><div id="eliminationsRoot" class="analytics-chart"></div></div>
+        <div id="tab-placements" class="tab-content"><div class="view-header"><div><h2 id="placementsTitle">Placement Distribution</h2><p class="hint" id="placementsHint">Finishing placements by starting role.</p></div></div><div id="placementsRoot" class="analytics-chart"></div></div>
+        <div id="tab-diversity" class="tab-content"><div class="view-header"><div><h2 id="diversityTitle">Geographic Diversity</h2><p class="hint" id="diversityHint">Distinct contestant cities and regions by season.</p></div></div><div id="diversityRoot" class="analytics-chart"></div></div>
+
         <!-- Tab 4: Player Timeline -->
         <div id="tab-timeline" class="tab-content">
           <div class="view-header">
@@ -141,7 +178,7 @@
       </section>
 
       <section class="detail card">
-        <h2>Contestant Profile</h2>
+        <h2 id="contestantProfileTitle">Contestant Profile</h2>
         <div id="profilePanel" class="profile-empty">Select a contestant point to view details and sources.</div>
       </section>
     </main>

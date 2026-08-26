@@ -18,6 +18,37 @@ function indexById(records) {
   }, {});
 }
 
+const COUNTRY_UI_LOCALE = {
+  "United Kingdom": "en-GB",
+  "United States": "en-US",
+  Australia: "en-AU",
+  "New Zealand": "en-NZ",
+  Canada: "en-CA",
+  Netherlands: "nl-NL",
+  Bulgaria: "bg-BG",
+  "Belgium (Flanders)": "nl-BE",
+  "Belgium (Wallonia)": "fr-BE",
+  Czechia: "cs-CZ",
+  Finland: "fi-FI",
+  Denmark: "da-DK",
+  Greece: "el-GR",
+  France: "fr-FR",
+  Germany: "de-DE",
+  Hungary: "hu-HU",
+  India: "hi-IN",
+  Ireland: "en-IE",
+  Israel: "he-IL",
+  Italy: "it-IT",
+  Norway: "nb-NO",
+  Poland: "pl-PL",
+  Portugal: "pt-PT",
+  Romania: "ro-RO",
+  Spain: "es-ES",
+  Sweden: "sv-SE",
+  "Canada (Québec)": "fr-CA",
+  Ukraine: "uk-UA"
+};
+
 function getParticipantRows(data, filters = {}) {
   const franchisesById = indexById(data.franchises);
   const seasonsById = indexById(data.seasons);
@@ -122,6 +153,41 @@ app.get("/api/countries", (req, res) => {
   const data = loadData();
   const countries = [...new Set(data.franchises.map((franchise) => franchise.country))].sort();
   res.json(countries);
+});
+
+app.get("/api/language-kits", (req, res) => {
+  const data = loadData();
+
+  function parseLanguages(rawLanguage) {
+    if (!rawLanguage) return ["English"];
+    return String(rawLanguage)
+      .split("/")
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+  }
+
+  const byCountry = data.franchises.reduce((acc, franchise) => {
+    if (!acc[franchise.country]) {
+      acc[franchise.country] = new Set();
+    }
+    parseLanguages(franchise.language).forEach((language) => {
+      acc[franchise.country].add(language);
+    });
+    return acc;
+  }, {});
+
+  const kits = Object.keys(byCountry)
+    .sort((a, b) => a.localeCompare(b))
+    .map((country) => {
+      const languages = [...byCountry[country]].sort((a, b) => a.localeCompare(b));
+      return {
+        country,
+        languages,
+        ui_locale: COUNTRY_UI_LOCALE[country] || "en-US"
+      };
+    });
+
+  res.json(kits);
 });
 
 app.get("/api/contestants", (req, res) => {
@@ -387,6 +453,94 @@ app.get("/api/leaderboard", (req, res) => {
 
   const ranked = Object.values(byCity).sort((a, b) => b.total_contestants - a.total_contestants || a.city.localeCompare(b.city));
   res.json(ranked);
+});
+
+app.get("/api/outcome-funnel", (req, res) => {
+  const data = loadData();
+  const rows = getParticipantRows(data, {
+    country: req.query.country || null,
+    seasonId: req.query.seasonId || "all",
+    role: req.query.role || null,
+    outcome: req.query.outcome || null
+  });
+
+  const count = (predicate) => rows.filter(predicate).length;
+  res.json({
+    total: rows.length,
+    starting_roles: {
+      faithful: count((row) => row.starting_role === "faithful"),
+      traitor: count((row) => row.starting_role === "traitor")
+    },
+    outcomes: {
+      murder: count((row) => row.exit_type === "murder"),
+      banishment: count((row) => row.exit_type === "banishment"),
+      quit: count((row) => row.exit_type === "quit"),
+      finalists: count((row) => row.exit_type === "finale" || row.winner),
+      winners: count((row) => row.winner)
+    }
+  });
+});
+
+app.get("/api/advanced-analytics", (req, res) => {
+  const data = loadData();
+  const rows = getParticipantRows(data, {
+    country: req.query.country || null,
+    seasonId: req.query.seasonId || "all",
+    role: req.query.role || null,
+    outcome: req.query.outcome || null
+  });
+
+  const median = (values) => {
+    const sorted = values.filter(Number.isFinite).sort((a, b) => a - b);
+    if (!sorted.length) return null;
+    const middle = Math.floor(sorted.length / 2);
+    return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+  };
+  const groupBy = (keyFor) => rows.reduce((groups, row) => {
+    const key = keyFor(row);
+    (groups[key] ||= []).push(row);
+    return groups;
+  }, {});
+
+  const bySeason = groupBy((row) => `${row.franchise_name} — S${row.season_number}`);
+  const survival = Object.entries(bySeason).map(([label, group]) => ({
+    label,
+    faithful: median(group.filter((row) => row.starting_role === "faithful").map((row) => row.exit_episode)),
+    traitor: median(group.filter((row) => row.starting_role === "traitor").map((row) => row.exit_episode))
+  })).sort((a, b) => a.label.localeCompare(b.label));
+
+  const byFranchise = groupBy((row) => row.franchise_name || "Unknown");
+  const winRates = Object.entries(byFranchise).map(([label, group]) => {
+    const roleRate = (role) => {
+      const roleRows = group.filter((row) => row.starting_role === role);
+      return { total: roleRows.length, rate: roleRows.length ? Math.round((roleRows.filter((row) => row.winner).length / roleRows.length) * 100) : 0 };
+    };
+    return { label, faithful: roleRate("faithful"), traitor: roleRate("traitor") };
+  }).sort((a, b) => a.label.localeCompare(b.label));
+
+  const byEpisode = groupBy((row) => String(row.exit_episode ?? "Unknown"));
+  const eliminationTimeline = Object.entries(byEpisode).map(([episode, group]) => ({
+    episode: Number.isFinite(Number(episode)) ? Number(episode) : null,
+    murder: group.filter((row) => row.exit_type === "murder").length,
+    banishment: group.filter((row) => row.exit_type === "banishment").length,
+    quit: group.filter((row) => row.exit_type === "quit").length,
+    finale: group.filter((row) => row.exit_type === "finale" || row.winner).length
+  })).sort((a, b) => (a.episode ?? Infinity) - (b.episode ?? Infinity));
+
+  const byPlacement = groupBy((row) => String(row.placement ?? "Unknown"));
+  const placements = Object.entries(byPlacement).map(([placement, group]) => ({
+    placement: Number.isFinite(Number(placement)) ? Number(placement) : null,
+    faithful: group.filter((row) => row.starting_role === "faithful").length,
+    traitor: group.filter((row) => row.starting_role === "traitor").length
+  })).sort((a, b) => (a.placement ?? Infinity) - (b.placement ?? Infinity));
+
+  const diversity = Object.entries(bySeason).map(([label, group]) => ({
+    label,
+    cities: new Set(group.map((row) => row.city).filter(Boolean)).size,
+    regions: new Set(group.map((row) => row.region).filter(Boolean)).size
+  })).sort((a, b) => a.label.localeCompare(b.label));
+
+  res.json({ survival, win_rates: winRates, elimination_timeline: eliminationTimeline, placements, diversity });
 });
 
 app.get("/api/voting-analytics", (req, res) => {
