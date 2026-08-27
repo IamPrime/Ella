@@ -1,32 +1,48 @@
-# Reality Competition Analytics Platform (Vertical Slice MVP)
+# Reality Competition Analytics Platform
 
-This repository contains a runnable vertical-slice application derived from the specification in `reality_competition_analytics_platform.md`.
+This repository is a vertical-slice analytics application for reality competition data, built around a canonical, normalized, provenance-aware model.
 
-## What this build includes
+## Project overview
 
-- **Canonical Normalized Domain Model**:
-  - `franchises`, `seasons`, `people`, `locations`, `person_locations`, `participations`, `game_events`, `votes`, `sources`, and `source_claims`
-- **Tabbed Single-Page Interface** (instant content switching without page reloads):
-  - 🗺️ **Contestant Map**: Interactive D3 geo map, world polygons, active country highlighting, pan/zoom (+/- / Reset), and hover tooltips.
-  - 📊 **City Leaderboard**: D3 horizontal bar chart of top origin cities + full ranking table with breakdown of Faithfuls, Traitors, and Winners.
-  - 🎯 **Voting Analytics & Sabermetrics**: Traitor detection accuracy, false accusation rate, majority alignment %, and searchable roundtable logs.
-  - ⏳ **Player Journey Timeline**: Chronological episode cards with event badges (shields, murder attempts, recruitments, banishments, votes).
-  - 🕸️ **Social & Voting Graph**: D3 force-directed network showing voter $\rightarrow$ target relationships with drag interaction.
-- **Dynamic Country & Season Scoping**:
-  - Filter across UK, US, Australia, New Zealand, Canada with "All seasons in country" or per-season drilldowns.
-  - Role and outcome filtering across all tabs.
-  - Franchise Host & Castle/Location context display.
-- **Contestant Accordion & Provenance Layer**:
-  - Single-open accordion list of matching contestants.
-  - "Show Sources" toggle for auditable provenance claims, URLs, confidence scores, and formatted retrieval dates.
+The app presents a browser-based dashboard for exploring:
+
+- contestant geography by country and season
+- city-level origin breakdowns
+- voting and elimination analytics
+- player timelines
+- social/voting network graphs
+- source-backed contestant profiles
+
+The product direction is defined in [reality_competition_analytics_platform.md](reality_competition_analytics_platform.md), and the application is designed as a foundation for franchise-agnostic expansion beyond The Traitors.
+
+## Features
+
+- Canonical normalized domain model covering franchises, seasons, people, locations, participations, votes, and source claims
+- Interactive D3-powered map, leaderboard, voting summary, and network graph
+- Country and season scoping with role and outcome filters
+- Contestant profile panel with provenance metadata
+- Express API for filtering and analytics queries
 
 ## Quick start
 
-- Step 1 — Install dependencies: `npm install`
-- Step 2 — Run the app: `npm start` (if port 3000 is occupied, it automatically retries on the next available port)
-- Step 3 — Open the printed URL (e.g. `http://localhost:3000` or `http://localhost:3001`)
+```bash
+npm install
+npm start
+```
 
-## API endpoints
+Then open the printed local URL, usually:
+
+- [http://localhost:3000](Localhost)
+- or the next available port if 3000 is in use
+
+## Documentation
+
+- [Getting Started](./docs/getting-started.md)
+- [User Guide](./docs/user-guide.md)
+- [Contributing Guide](./docs/contributing.md)
+- [Documentation Index](./docs/README.md)
+
+## Key API endpoints
 
 - `GET /api/countries`
 - `GET /api/franchises`
@@ -40,8 +56,25 @@ This repository contains a runnable vertical-slice application derived from the 
 - `GET /api/people/:personId/timeline`
 - `GET /api/voting-graph?country=&seasonId=&role=&outcome=`
 
+## Project structure
+
+```text
+.
+├── public/                  # Frontend UI assets
+├── data/                    # Canonical dataset files
+├── docs/                    # User and contribution docs
+├── server.js                # Express API and dataset loading
+├── build_full_dataset.js    # Dataset builder
+├── build_international_dataset.js
+├── merge_new_editions.js    # International editions merge helper
+├── package.json             # App metadata and scripts
+├── README.md                # Root project guide
+├── reality_competition_analytics_platform.md
+└── server.js
+```
+
 ## Notes
 
-- This is the requested MVP vertical slice (Phase 1 + Phase 2 direction).
-- Data is intentionally small and seeded for architecture validation.
-- The schema design mirrors the normalization/provenance model so migration to PostgreSQL/Laravel can be done without rewriting product behavior.
+- This is a vertical-slice MVP for product validation and architecture exploration.
+- The data model is intentionally normalized so new franchises and seasons can be added without redesigning the app.
+- Provenance is considered a first-class concern, not a later feature.
